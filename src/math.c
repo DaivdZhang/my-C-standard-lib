@@ -3,7 +3,7 @@
 #define M_PI 3.14159265358979323846
 #define M_E 2.71828182845904523536
 
-unsigned long long factor(unsigned int n);
+unsigned long long fac(unsigned int n);
 
 double sin (double);
 double cos (double);
@@ -35,7 +35,7 @@ double ldexp (double x, int p);
 double modf (double, double*);
 double fmod (double, double);
 
-unsigned long long factor(unsigned int n)
+unsigned long long fac(unsigned int n)
 {
     unsigned long long t = 1;
 
@@ -55,7 +55,7 @@ double sin(double x)
 
     x *= M_PI/180;
     for(unsigned int i = 0; i != 8; i++)
-        y += pow(-1.0, i)/factor(2*i+1)*pow(x, 2*i+1);
+        y += pow(-1.0, i)/fac(2*i+1)*pow(x, 2*i+1);
 
     return y;
 }
@@ -67,7 +67,7 @@ double cos(double x)
 
     x *= M_PI/180;
     for(unsigned int i = 0; i != 8; i++)
-        y += _pow(-1.0, i)/factor(2*i)*_pow(x, 2*i);
+        y += _pow(-1.0, i)/fac(2*i)*_pow(x, 2*i);
 
     return y;
 }
@@ -89,7 +89,7 @@ double asin(double x)
     double y = 0;
 
     for(unsigned int i = 0; i != 8; i++)
-        y += factor(2*i)/(_pow(4.0, i)*_pow(factor(i), 2)*(2*i+1))*_pow(x, 2*i+1);
+        y += fac(2*i)/(_pow(4.0, i)*_pow(fac(i), 2)*(2*i+1))*_pow(x, 2*i+1);
 
     return y;
 }
@@ -160,7 +160,7 @@ double exp(double x)
     double y = 0;
 
     for(unsigned int i = 0; i != 8; i++)
-        y += _pow(x, i)/factor(i);
+        y += _pow(x, i)/fac(i);
 
     return y;
 }
