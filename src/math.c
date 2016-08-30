@@ -35,6 +35,9 @@ double ldexp (double x, int p);
 double modf (double, double*);
 double fmod (double, double);
 
+double hypot(double, double);
+double poly(double, int, double*);
+
 unsigned long long fac(unsigned int n)
 {
     unsigned long long t = 1;
@@ -175,8 +178,8 @@ double sqrt(double a)
     while(1)
     {
         px = cx;
-        cx -= cx/2 + a/2/cx;
-        if(fabs(cx - px) < eps)
+        cx = cx - cx/2 + a/2/cx;
+        if(fabs(cx - px) <= eps)
             break;
     }
     return cx;
@@ -297,4 +300,27 @@ double fmod (double x, double y)
     r = x/y;
     modf(r, &p);
     return p*y;
+}
+
+
+double hypot(double a, double b)
+{
+    double c = 0;
+
+    c = _pow(a, 2)+_pow(b, 2);
+    return sqrt(c);
+}
+
+
+double poly(double x, int n, double c[])
+{
+    double y = 0;
+
+    while(n >= 0)
+    {
+        y += c[n]*_pow(x, n);
+        n--;
+    }
+
+    return y;
 }
