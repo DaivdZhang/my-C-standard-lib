@@ -14,6 +14,9 @@ Matrix eye(unsigned int);
 Matrix random(unsigned int, unsigned int);
 Matrix from_array(double*, unsigned int, unsigned int);
 
+int is_empty(Matrix);
+int is_sparse(Matrix, double);
+
 void mprint(Matrix);
 
 Matrix madd(Matrix, Matrix);

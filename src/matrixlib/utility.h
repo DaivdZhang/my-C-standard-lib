@@ -4,7 +4,7 @@
 struct _ctuple{
     void** elements;
     unsigned int tsize;
-};
+}; // TODO: finish it.
 
 typedef struct _ctuple CTuple;
 

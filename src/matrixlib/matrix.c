@@ -70,6 +70,29 @@ Matrix from_array(double* array, unsigned int row, unsigned int col)
 }
 
 
+int is_empty(Matrix mat)
+{
+    if(mat.shape[0] == 0 && mat.shape[1] == 0 && mat.array == NULL)
+        return 1;
+    else
+        return 0;
+}
+
+
+int is_sparse(Matrix mat, double threshold)
+{
+    unsigned int count = 0;
+    for(unsigned int i = 0; i < mat.shape[0]; i++)
+        for(unsigned int j = 0; j < mat.shape[0]; j++)
+            if(mat.array[i][j] == 0)
+                count++;
+    if(count*1.0/mat.shape[0]/mat.shape[1] >= threshold)
+        return 1;
+    else
+        return 0;
+}
+
+
 Matrix mcopy(Matrix new_mat, Matrix mat)
 {
     for(unsigned int i = 0; i < mat.shape[0]; i++)
@@ -211,6 +234,8 @@ Matrix _transform(Matrix mat, int identity, int* flag)
         }
         for(unsigned int _i = i + 1; _i < _mat.shape[0]; _i++)
         {
+            if(_mat.array[i][i] == 0)
+                break;
             k = _mat.array[_i][i]/_mat.array[i][i];
             if(k == 0)
                 continue;
@@ -219,6 +244,7 @@ Matrix _transform(Matrix mat, int identity, int* flag)
     }
     if(flag != NULL)
         *flag = count;
+
     if(identity == 0)
         return _mat;
     else
@@ -229,11 +255,12 @@ Matrix _transform(Matrix mat, int identity, int* flag)
             {
                 if(_mat.array[j][j] == 0)
                 {   
-                    printf("i'm in");
                     for(long long _ = i - 1; _ >= 0; _--)
                         if(_mat.array[_][i] != 0)
                             swap(_mat.array[_], _mat.array[i], _mat.shape[1]);
                 }
+                if(_mat.array[j][j] == 0)
+                    break;
                 k = _mat.array[i][j]/_mat.array[j][j];
                 if(k == 0)
                     continue;
