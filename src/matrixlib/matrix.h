@@ -17,7 +17,10 @@ Matrix zeros(unsigned int, unsigned int);
 Matrix eye(unsigned int);
 Matrix random(unsigned int, unsigned int);
 Matrix from_array(double*, unsigned int, unsigned int);
+Matrix* clear(Matrix*);
 
+double* flat(Matrix);
+Matrix reshape(Matrix, unsigned int, unsigned int);
 int is_empty(Matrix);
 int is_sparse(Matrix, double);
 
