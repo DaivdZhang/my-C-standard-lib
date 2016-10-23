@@ -5,8 +5,38 @@
 #include "matrix.h"
 #include "utility.h"
 
-Matrix _transform(Matrix, int, int*);
+Matrix* mat_pool[POOL_SIZE] = {NULL};
 
+Matrix _transform(Matrix, int, int*);
+Matrix get_matrix();
+
+
+Matrix get_matrix()
+{
+    for(unsigned int i = 0; i < POOL_SIZE; i++)
+        if(mat_pool[i] != NULL)
+        {
+            Matrix* p = mat_pool[i];
+            mat_pool[i] = NULL;
+            return *p;
+        }
+    Matrix* p = (Matrix*)calloc(sizeof(Matrix), 1);
+    return *p;
+}
+
+
+Matrix* return_matrix(Matrix* pmat)
+{
+    for(unsigned int i = 0; i < POOL_SIZE; i++)
+        if(mat_pool[i] == NULL)
+        {
+            mat_pool[i] = pmat;
+            return pmat;
+        }
+    mdestroy(pmat);
+    free(pmat);
+    return NULL;
+}
 
 int mdestroy(Matrix* mat)
 {
@@ -20,8 +50,9 @@ int mdestroy(Matrix* mat)
 Matrix zeros(unsigned int row, unsigned int col)
 {
     Matrix mat;
+    mat = get_matrix();
 
-    mat.array = (double**)malloc(sizeof(double*)*row);
+    mat.array = (double**)calloc(sizeof(double*), row);
     if(mat.array == NULL)
         exit(202020);
     for(unsigned int i = 0; i < row; i++)
