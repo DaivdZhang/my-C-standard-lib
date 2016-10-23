@@ -5,8 +5,38 @@
 #include "matrix.h"
 #include "utility.h"
 
-Matrix _transform(Matrix, int, int*);
+Matrix* mat_pool[POOL_SIZE] = {NULL};
 
+Matrix _transform(Matrix, int, int*);
+Matrix get_matrix();
+
+
+Matrix get_matrix()
+{
+    for(unsigned int i = 0; i < POOL_SIZE; i++)
+        if(mat_pool[i] != NULL)
+        {
+            Matrix* p = mat_pool[i];
+            mat_pool[i] = NULL;
+            return *p;
+        }
+    Matrix* p = (Matrix*)calloc(sizeof(Matrix), 1);
+    return *p;
+}
+
+
+Matrix* return_matrix(Matrix* pmat)
+{
+    for(unsigned int i = 0; i < POOL_SIZE; i++)
+        if(mat_pool[i] == NULL)
+        {
+            mat_pool[i] = pmat;
+            return pmat;
+        }
+    mdestroy(pmat);
+    free(pmat);
+    return NULL;
+}
 
 int mdestroy(Matrix* mat)
 {
@@ -20,8 +50,10 @@ int mdestroy(Matrix* mat)
 Matrix zeros(unsigned int row, unsigned int col)
 {
     Matrix mat;
-
-    mat.array = (double**)malloc(sizeof(double*)*row);
+    mat = get_matrix();
+    mdestroy(&mat);
+    
+    mat.array = (double**)calloc(sizeof(double*), row);
     if(mat.array == NULL)
         exit(202020);
     for(unsigned int i = 0; i < row; i++)
@@ -60,13 +92,71 @@ Matrix random(unsigned int row, unsigned int col)
 }
 
 
-Matrix from_array(double* array, unsigned int row, unsigned int col)
+Matrix from_array(double* arr, unsigned int row, unsigned int col)
 {
     Matrix mat = zeros(row, col);
 
     for(unsigned int i = 0; i < row*col; i++)
-        mat.array[i/col][i%col] = *(array + i);
+        mat.array[i/col][i%col] = *(arr + i);
     return mat;
+}
+
+
+Matrix* clear(Matrix* pmat)
+{
+    for(unsigned int i = 0; i < pmat->shape[0]*pmat->shape[1]; i++)
+        pmat->array[i/pmat->shape[1]][i%pmat->shape[1]] = 0;
+    return pmat;
+}
+
+
+double* flat(Matrix mat)
+{
+    double* ret = NULL;
+    ret = (double*)calloc(sizeof(double), mat.shape[0]*mat.shape[1]);
+    if(ret == NULL)
+        exit(202020);
+
+    for(unsigned int i = 0; i < mat.shape[0]*mat.shape[1]; i++)
+        ret[i] = mat.array[i/mat.shape[1]][i%mat.shape[1]];
+    return ret;
+}
+
+
+Matrix reshape(Matrix mat, unsigned int row, unsigned int col)
+{
+    if(mat.shape[0]*mat.shape[1] != row*col)
+    {
+        printf("the scale of new mat is not equal to the orginal one.");
+        exit(303030);
+    }
+
+    double* arr = flat(mat);
+    mdestroy(&mat);
+    mat = from_array(arr, row, col);
+    return mat;
+}
+
+int is_empty(Matrix mat)
+{
+    if(mat.shape[0] == 0 && mat.shape[1] == 0 && mat.array == NULL)
+        return 1;
+    else
+        return 0;
+}
+
+
+int is_sparse(Matrix mat, double threshold)
+{
+    unsigned int count = 0;
+    for(unsigned int i = 0; i < mat.shape[0]; i++)
+        for(unsigned int j = 0; j < mat.shape[0]; j++)
+            if(mat.array[i][j] == 0)
+                count++;
+    if(count*1.0/mat.shape[0]/mat.shape[1] >= threshold)
+        return 1;
+    else
+        return 0;
 }
 
 
@@ -211,6 +301,8 @@ Matrix _transform(Matrix mat, int identity, int* flag)
         }
         for(unsigned int _i = i + 1; _i < _mat.shape[0]; _i++)
         {
+            if(_mat.array[i][i] == 0)
+                break;
             k = _mat.array[_i][i]/_mat.array[i][i];
             if(k == 0)
                 continue;
@@ -219,6 +311,7 @@ Matrix _transform(Matrix mat, int identity, int* flag)
     }
     if(flag != NULL)
         *flag = count;
+
     if(identity == 0)
         return _mat;
     else
@@ -229,11 +322,12 @@ Matrix _transform(Matrix mat, int identity, int* flag)
             {
                 if(_mat.array[j][j] == 0)
                 {   
-                    printf("i'm in");
                     for(long long _ = i - 1; _ >= 0; _--)
                         if(_mat.array[_][i] != 0)
                             swap(_mat.array[_], _mat.array[i], _mat.shape[1]);
                 }
+                if(_mat.array[j][j] == 0)
+                    break;
                 k = _mat.array[i][j]/_mat.array[j][j];
                 if(k == 0)
                     continue;
