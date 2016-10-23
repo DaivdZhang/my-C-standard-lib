@@ -23,7 +23,8 @@ Matrix nmul(Matrix, double);
 Matrix pmul(Matrix, Matrix);
 
 Matrix transpose(Matrix);
-Matrix _transform(Matrix, int*);
 double det(Matrix);
+Matrix inv(Matrix);
+double trace(Matrix);
 
 #endif

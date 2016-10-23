@@ -29,3 +29,15 @@ double* array_sub(double* arr1, double* arr2, unsigned int length, double k)
     
     return ret;
 }
+
+
+double* array_div(double* arr1, double* arr2, unsigned int length, double k)
+{   
+    double* ret = (double*)calloc(sizeof(double), length);
+    if(ret == NULL)
+        exit(202020);
+    for(unsigned int i = 0; i < length; i++)
+        ret[i] = arr1[i]/arr2[i]*k;
+    
+    return ret;
+}

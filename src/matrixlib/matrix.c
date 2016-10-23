@@ -5,6 +5,8 @@
 #include "matrix.h"
 #include "utility.h"
 
+Matrix _transform(Matrix, int, int*);
+
 
 int mdestroy(Matrix* mat)
 {
@@ -70,8 +72,8 @@ Matrix from_array(double* array, unsigned int row, unsigned int col)
 
 Matrix mcopy(Matrix new_mat, Matrix mat)
 {
-    for(unsigned int i = 0; i < new_mat.shape[0]; i++)
-        for(unsigned int j = 0; j < new_mat.shape[1]; j++)
+    for(unsigned int i = 0; i < mat.shape[0]; i++)
+        for(unsigned int j = 0; j < mat.shape[1]; j++)
             new_mat.array[i][j] = mat.array[i][j];
 
     return new_mat;
@@ -189,7 +191,7 @@ Matrix transpose(Matrix mat)
 }
 
 
-Matrix _transform(Matrix mat, int* flag)
+Matrix _transform(Matrix mat, int identity, int* flag)
 {    
     Matrix _mat = zeros(mat.shape[0], mat.shape[1]);
     mcopy(_mat, mat);
@@ -217,7 +219,37 @@ Matrix _transform(Matrix mat, int* flag)
     }
     if(flag != NULL)
         *flag = count;
-    return _mat;
+    if(identity == 0)
+        return _mat;
+    else
+    {
+        for(long long j = _mat.shape[0] - 1; j >= 0; j--)
+        {
+            for(long long i = j - 1; i >= 0; i--)
+            {
+                if(_mat.array[j][j] == 0)
+                {   
+                    printf("i'm in");
+                    for(long long _ = i - 1; _ >= 0; _--)
+                        if(_mat.array[_][i] != 0)
+                            swap(_mat.array[_], _mat.array[i], _mat.shape[1]);
+                }
+                k = _mat.array[i][j]/_mat.array[j][j];
+                if(k == 0)
+                    continue;
+                _mat.array[i] = array_sub(_mat.array[i], _mat.array[j], _mat.shape[1], k);
+            }
+        }
+        for(unsigned int i = 0; i < mat.shape[0]; i++)
+            if(_mat.array[i][i] != 1)
+            {
+                double tmp[_mat.shape[1]];
+                for(unsigned int _ = 0; _ < _mat.shape[1]; _++)
+                    tmp[_] = _mat.array[i][i];
+                _mat.array[i] = array_div(_mat.array[i], tmp, _mat.shape[1], 1);
+            }
+        return _mat;
+    }
 }
 
 
@@ -229,11 +261,52 @@ double det(Matrix mat)
     
     Matrix _mat = zeros(mat.shape[0], mat.shape[1]);
     double value = 1;
-    mcopy(_mat, _transform(mat, flag));
+    mcopy(_mat, _transform(mat, 0, flag));
 
     for(unsigned int i = 0; i < mat.shape[0]; i++)
         value *= _mat.array[i][i];
         
     mdestroy(&_mat);
     return value*(*flag);
+}
+
+
+Matrix inv(Matrix mat)
+{
+    if(mat.shape[0] != mat.shape[1])
+    {
+        printf("square matrix expected");
+        exit(303030);
+    }
+
+    Matrix _mat = zeros(mat.shape[0], 2*mat.shape[1]);
+    mcopy(_mat, mat);
+    for(unsigned int i = 0; i < _mat.shape[0]; i++)
+        for(unsigned int j = mat.shape[0]; j < _mat.shape[1]; j++)
+            if(i == j%mat.shape[0])
+                _mat.array[i][j] = 1;
+
+    _mat = _transform(_mat, 1, NULL);
+    Matrix tmp = zeros(_mat.shape[0], _mat.shape[0]);
+    for(unsigned int i = 0; i < tmp.shape[0]; i++)
+        for(unsigned int j = 0; j < tmp.shape[1]; j++)
+            tmp.array[i][j] = _mat.array[i][j+tmp.shape[1]];
+
+    mdestroy(&_mat);
+    return tmp;
+}
+
+
+double trace(Matrix mat)
+{
+    if(mat.shape[0] != mat.shape[1])
+    {
+        printf("square matrix expected");
+        exit(303030);
+    }
+
+    double value = 0;
+    for(unsigned int i = 0; i < mat.shape[0]; i++)
+        value += mat.array[i][i];
+    return value;
 }
