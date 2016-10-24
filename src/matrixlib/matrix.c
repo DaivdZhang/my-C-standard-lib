@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <time.h>
 #include "matrix.h"
@@ -30,6 +31,7 @@ Matrix* return_matrix(Matrix* pmat)
     for(unsigned int i = 0; i < POOL_SIZE; i++)
         if(mat_pool[i] == NULL)
         {
+            mdestroy(pmat);
             mat_pool[i] = pmat;
             return pmat;
         }
@@ -38,11 +40,12 @@ Matrix* return_matrix(Matrix* pmat)
     return NULL;
 }
 
-int mdestroy(Matrix* mat)
+int mdestroy(Matrix* pmat)
 {
-    for(unsigned int i = 0; i < mat->shape[0]; i++)
-        free(mat->array[i]);
-    free(mat->array);
+    pmat = clear(pmat);
+    for(unsigned int i = 0; i < pmat->shape[0]; i++)
+        free(pmat->array[i]);
+    free(pmat->array);
     return 0;
 }
 
@@ -51,8 +54,7 @@ Matrix zeros(unsigned int row, unsigned int col)
 {
     Matrix mat;
     mat = get_matrix();
-    mdestroy(&mat);
-    
+
     mat.array = (double**)calloc(sizeof(double*), row);
     if(mat.array == NULL)
         exit(202020);
@@ -73,9 +75,7 @@ Matrix eye(unsigned int n)
     Matrix mat = zeros(n, n);
 
     for(unsigned int i = 0; i < n; i++)
-        for(unsigned int j = 0; j < n; j++)
-            if(i == j)
-                mat.array[i][j] = 1;
+        mat.array[i][i] = 1;
     return mat;
 }
 
@@ -104,8 +104,9 @@ Matrix from_array(double* arr, unsigned int row, unsigned int col)
 
 Matrix* clear(Matrix* pmat)
 {
-    for(unsigned int i = 0; i < pmat->shape[0]*pmat->shape[1]; i++)
-        pmat->array[i/pmat->shape[1]][i%pmat->shape[1]] = 0;
+    for(unsigned int i = 0; i < pmat->shape[0]; i++)
+        memset(pmat->array[i], 0.0, pmat->shape[1]);
+        // pmat->array[i/pmat->shape[1]][i%pmat->shape[1]] = 0;
     return pmat;
 }
 
@@ -162,24 +163,33 @@ int is_sparse(Matrix mat, double threshold)
 
 Matrix mcopy(Matrix new_mat, Matrix mat)
 {
+    /*
     for(unsigned int i = 0; i < mat.shape[0]; i++)
         for(unsigned int j = 0; j < mat.shape[1]; j++)
             new_mat.array[i][j] = mat.array[i][j];
-
+    */
+    for(unsigned int i = 0; i < mat.shape[0]; i++)
+        memmove(new_mat.array[i], mat.array[i], sizeof(double)*mat.shape[1]);
     return new_mat;
 }
 
 
 void mprint(Matrix mat)
 {   
+    printf("[");
     for(unsigned int i = 0; i < mat.shape[0]; i++)
     {
-        printf("[");
+        if(i != 0)
+            printf(" [");
+        else
+            printf("[");
         for(unsigned int j = 0; j < mat.shape[1]; j++)
         {
             printf("%lf ", mat.array[i][j]);
-            if(j + 1 == mat.shape[1])
+            if(j + 1 == mat.shape[1] && (i + 1) != mat.shape[0])
                 printf("\b]\n");
+            if(j + 1 == mat.shape[1] && (i + 1) == mat.shape[0])
+                printf("\b]]");
         }
     }
     printf("\n");

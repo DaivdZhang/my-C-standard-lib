@@ -10,6 +10,7 @@ struct _matrix{
 
 typedef struct _matrix Matrix;
 
+
 int mdestroy(Matrix*);
 Matrix* return_matrix(Matrix*);
 
