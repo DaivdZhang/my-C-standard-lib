@@ -10,19 +10,23 @@ struct _matrix{
 
 typedef struct _matrix Matrix;
 
+
 int mdestroy(Matrix*);
 Matrix* return_matrix(Matrix*);
 
+Matrix* initialize();
 Matrix zeros(unsigned int, unsigned int);
 Matrix eye(unsigned int);
 Matrix random(unsigned int, unsigned int);
 Matrix from_array(double*, unsigned int, unsigned int);
 Matrix* clear(Matrix*);
+Matrix fill(Matrix*, double);
 
 double* flat(Matrix);
-Matrix reshape(Matrix, unsigned int, unsigned int);
+Matrix reshape(Matrix*, unsigned int, unsigned int);
 int is_empty(Matrix);
 int is_sparse(Matrix, double);
+int is_equal(Matrix*, Matrix*);
 
 void mprint(Matrix);
 
