@@ -3,7 +3,6 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
-#include <errno.h>
 #include "matrix.h"
 #include "utility.h"
 
@@ -59,7 +58,7 @@ Matrix* initialize()
     if(pmat == NULL)
     {
         printf("failed to initialize a matrix\n");
-        exit(202020);
+        exit(-1);
     }
     else
     {
@@ -79,7 +78,7 @@ Matrix zeros(unsigned int row, unsigned int col)
     if(mat.array == NULL)
     {
         printf("failed to allocate memory\n");
-        exit(202020);
+        exit(-1);
     }
     for(unsigned int i = 0; i < row; i++)
     {
@@ -87,7 +86,7 @@ Matrix zeros(unsigned int row, unsigned int col)
         if(mat.array[i] == NULL)
         {
             printf("failed to allocate memory\n");
-            exit(202020);
+            exit(-1);
         }
     }
     mat.shape[0] = row;
@@ -132,7 +131,6 @@ Matrix* clear(Matrix* pmat)
 {
     for(unsigned int i = 0; i < pmat->shape[0]; i++)
         memset(pmat->array[i], 0.0, pmat->shape[1]);
-        // pmat->array[i/pmat->shape[1]][i%pmat->shape[1]] = 0;
     return pmat;
 }
 
@@ -151,7 +149,7 @@ double* flat(Matrix mat)
     double* ret = NULL;
     ret = (double*)calloc(sizeof(double), mat.shape[0]*mat.shape[1]);
     if(ret == NULL)
-        exit(202020);
+        exit(-1);
 
     for(unsigned int i = 0; i < mat.shape[0]*mat.shape[1]; i++)
         ret[i] = mat.array[i/mat.shape[1]][i%mat.shape[1]];
@@ -164,7 +162,7 @@ Matrix reshape(Matrix* pmat, unsigned int row, unsigned int col)
     if(pmat->shape[0]*pmat->shape[1] != row*col)
     {
         printf("the scale of new mat is not equal to the orginal one\n");
-        exit(303030);
+        exit(-1);
     }
 
     double* arr = flat(*pmat);
@@ -211,11 +209,6 @@ int is_equal(Matrix* a, Matrix* b)
 
 Matrix mcopy(Matrix new_mat, Matrix mat)
 {
-    /*
-    for(unsigned int i = 0; i < mat.shape[0]; i++)
-        for(unsigned int j = 0; j < mat.shape[1]; j++)
-            new_mat.array[i][j] = mat.array[i][j];
-    */
     for(unsigned int i = 0; i < mat.shape[0]; i++)
         memmove(new_mat.array[i], mat.array[i], sizeof(double)*mat.shape[1]);
     return new_mat;
@@ -249,7 +242,7 @@ Matrix madd(Matrix a, Matrix b)
     if(a.shape[0] != b.shape[0] || a.shape[1] != b.shape[1])
     {
         printf("cannot add two given matrixes\n");
-        exit(303030);
+        exit(-1);
     }
 
     Matrix c = zeros(a.shape[0], b.shape[1]);
@@ -265,7 +258,7 @@ Matrix msub(Matrix a, Matrix b)
     if(a.shape[0] != b.shape[0] || a.shape[1] != b.shape[1])
     {
         printf("cannot sub two given matrixes\n");
-        exit(303030);
+        exit(-1);
     }
 
     Matrix c = zeros(a.shape[0], b.shape[1]);
@@ -289,7 +282,7 @@ Matrix mmul(Matrix a, Matrix b)
     if(a.shape[1] != b.shape[0])
     {
         printf("cannot mul two given matrixes\n");
-        exit(303030);
+        exit(-1);
     }
 
     Matrix c = zeros(a.shape[0], b.shape[1]);
@@ -317,7 +310,7 @@ Matrix pmul(Matrix a, Matrix b)
     if(a.shape[0] != b.shape[0] || a.shape[1] != b.shape[1])
     {
         printf("cannot pmul two given matrixes\n");
-        exit(303030);
+        exit(-1);
     }
 
     Matrix c = zeros(a.shape[0], b.shape[1]);
@@ -374,9 +367,11 @@ Matrix _transform(Matrix mat, int identity, int* flag)
         return _mat;
     else
     {
-        for(long long j = _mat.shape[0] - 1; j >= 0; j--)
-        {
-            for(long long i = j - 1; i >= 0; i--)
+        unsigned int j = _mat.shape[0] - 1;
+        unsigned int i = j - 1;
+        while(1)
+        {   
+            while(1)
             {
                 if(_mat.array[j][j] == 0)
                 {   
@@ -390,7 +385,14 @@ Matrix _transform(Matrix mat, int identity, int* flag)
                 if(k == 0)
                     continue;
                 _mat.array[i] = array_sub(_mat.array[i], _mat.array[j], _mat.shape[1], k);
+                if(i == 0)
+                    break;
+                i--;
             }
+            j--;
+            if(j == 0)
+                break;
+            i = j - 1;
         }
         for(unsigned int i = 0; i < mat.shape[0]; i++)
             if(_mat.array[i][i] != 1)
@@ -411,7 +413,7 @@ double det(Matrix mat)
     if((flag = (int*)calloc(sizeof(int), 1)) == NULL)
     {
         printf("failed to allocate memory\n");
-        exit(202020);
+        exit(-1);
     }
 
     Matrix _mat = zeros(mat.shape[0], mat.shape[1]);
@@ -431,7 +433,7 @@ Matrix inv(Matrix mat)
     if(mat.shape[0] != mat.shape[1])
     {
         printf("square matrix expected\n");
-        exit(303030);
+        exit(-1);
     }
 
     Matrix _mat = zeros(mat.shape[0], 2*mat.shape[1]);
@@ -457,7 +459,7 @@ double trace(Matrix mat)
     if(mat.shape[0] != mat.shape[1])
     {
         printf("square matrix expected\n");
-        exit(303030);
+        exit(-1);
     }
 
     double value = 0;
