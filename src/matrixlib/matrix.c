@@ -43,8 +43,7 @@ Matrix* return_matrix(Matrix* pmat)
 int mdestroy(Matrix* pmat)
 {
     pmat = clear(pmat);
-    for(unsigned int i = 0; i < pmat->shape[0]; i++)
-        free(pmat->array[i]);
+    free(pmat->array[0]);
     free(pmat->array);
     return 0;
 }
@@ -75,20 +74,14 @@ Matrix zeros(unsigned int row, unsigned int col)
     mat = *initialize();
 
     mat.array = (double**)calloc(sizeof(double*), row);
-    if(mat.array == NULL)
+    double* tmp = (double*)calloc(sizeof(double), row*col);
+    if(mat.array == NULL || tmp == NULL)
     {
         printf("failed to allocate memory\n");
         exit(-1);
     }
     for(unsigned int i = 0; i < row; i++)
-    {
-        mat.array[i] = (double*)calloc(sizeof(double), col);
-        if(mat.array[i] == NULL)
-        {
-            printf("failed to allocate memory\n");
-            exit(-1);
-        }
-    }
+        mat.array[i] = tmp + i*col;
     mat.shape[0] = row;
     mat.shape[1] = col;
     return mat;
@@ -129,8 +122,9 @@ Matrix from_array(double* arr, unsigned int row, unsigned int col)
 
 Matrix* clear(Matrix* pmat)
 {
+    size_t size = sizeof(double);
     for(unsigned int i = 0; i < pmat->shape[0]; i++)
-        memset(pmat->array[i], 0.0, pmat->shape[1]);
+        memset(pmat->array[i], 0.0, pmat->shape[1]*size);
     return pmat;
 }
 
